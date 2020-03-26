@@ -1,6 +1,7 @@
 package hdwallet
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"encoding/binary"
 	"encoding/hex"
@@ -43,7 +44,7 @@ func (self *HdKey) extPubKey() (extkey *hdkeychain.ExtendedKey, err error) {
 	return extkey.Neuter()
 }
 
-func (self *HdKey) MainKey() IExtendKey {
+func (self *HdKey) Master() IExtendKey {
 	return self.i_ext
 }
 
@@ -62,7 +63,7 @@ func (self *HdKey) ExtKeyFromKey(key string) (extkey IExtendKey, err error) {
 	return self.i_ext.Child(index)
 }
 
-func (self *HdKey) PrivateEcdsaFromKey(key string) (ecPriKey *ecdsa.PrivateKey, err error) {
+func (self *HdKey) PrivateFromKeyStr(key string) (ecPriKey *ecdsa.PrivateKey, err error) {
 	if !self.IsPrivate() {
 		err = fmt.Errorf("not a private hdkey")
 		return
@@ -81,7 +82,7 @@ func (self *HdKey) PrivateEcdsaFromKey(key string) (ecPriKey *ecdsa.PrivateKey, 
 	return
 }
 
-func (self *HdKey) PublicEcdsaFromKey(key string) (ecPubKey *ecdsa.PublicKey, err error) {
+func (self *HdKey) PublicFromKeyStr(key string) (ecPubKey *ecdsa.PublicKey, err error) {
 	if !self.IsValid() {
 		err = InvalidHdKey
 		return
@@ -102,6 +103,29 @@ func (self *HdKey) NextIndex() uint32 {
 	index = self.next_child_index
 	self.mutx.Unlock()
 	return index
+}
+
+func (self *HdKey) Child(index uint32) (*HdChildKey, error) {
+	var err error
+	var child *HdChildKey
+
+	if !self.IsValid() {
+		err = InvalidHdKey
+		return nil, err
+	}
+
+	child = new(HdChildKey)
+
+	child.ExtKey, err = self.i_ext.Child(index)
+	if err != nil {
+		return nil, err
+	}
+	child.Chiper, err = indexToKey(index, 64, self.slat)
+	if err != nil {
+		return nil, err
+	}
+
+	return child, nil
 }
 
 func (self *HdKey) NextChilds(nu uint32) (childs []*HdChildKey, err error) {
@@ -178,6 +202,16 @@ func (self *HdKey) NextChild() (key string, ecPri *ecdsa.PrivateKey, ecPub *ecds
 	return
 }
 
+// todo: to implement
+func (self *HdKey) Serialize() string {
+	return ""
+}
+
+// todo: to implement
+func (self *HdKey) Unserialize(readio bytes.Buffer) error {
+	return nil
+}
+
 func NewFromExtKey(extkey IExtendKey, slat string, index uint32) (hdkey *HdKey, err error) {
 	if extkey == nil {
 		err = fmt.Errorf("Extkey is nil")
@@ -233,3 +267,4 @@ func keyToIndex(index_str, slat string) (uint32, error) {
 		}
 	}
 }
+

@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"gitlab.forceup.in/hdwallet"
+	"gitlab.forceup.in/hdwallet/utils"
 	"strings"
 )
 
@@ -56,15 +57,32 @@ func (self *eth_hdk) init() (*eth_hdk, error) {
 	return self, nil
 }
 
-func NewInstance(extend_key_str string) (hdwallet.IExtendKey, error) {
+func new_from_extkey_str(extend_key_str string) (hdwallet.IExtendKey, error) {
 	var hdk *hdkeychain.ExtendedKey
 	var err error
 	if hdk, err = hdkeychain.NewKeyFromString(extend_key_str); err != nil {
 		return nil, err
 	}
-	return NewInst(hdk)
+	return new_from_extkey(hdk)
 }
 
-func NewInst(hdk *hdkeychain.ExtendedKey) (*eth_hdk, error) {
+func new_from_extkey(hdk *hdkeychain.ExtendedKey) (*eth_hdk, error) {
 	return (&eth_hdk{BaseExtKey: &hdwallet.BaseExtKey{hdk}}).init()
+}
+
+func NewHdkey() (*hdwallet.HdKey, error) {
+	master, err := utils.NewExtMaster()
+	utils.Fatal_error(err)
+	eth_hdk, err := new_from_extkey(master)
+	utils.Fatal_error(err)
+	return hdwallet.NewFromExtKey(eth_hdk, "ethereum", 0)
+}
+
+func NewHdkFromExtkeyString(extKeyStr, slat string, first uint32) (*hdwallet.HdKey, error) {
+	extkey, err := new_from_extkey_str(extKeyStr)
+	if err != nil {
+		return nil, err
+	}
+
+	return hdwallet.NewFromExtKey(extkey, slat, first)
 }

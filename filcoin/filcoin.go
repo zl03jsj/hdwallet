@@ -12,6 +12,7 @@ import (
 	_ "github.com/filecoin-project/lotus/lib/sigs/secp"
 	"github.com/ipsn/go-secp256k1"
 	"gitlab.forceup.in/hdwallet"
+	"gitlab.forceup.in/hdwallet/utils"
 	"math/big"
 )
 
@@ -25,7 +26,7 @@ func (self *filcoin_hdk) Child(index uint32) (hdwallet.IExtendKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewInst(baseext.Extkey)
+	return new_from_extkey(baseext.Extkey)
 }
 
 func (self *filcoin_hdk) Base() *hdwallet.BaseExtKey {
@@ -93,17 +94,17 @@ func filcoin_key_from_private(key *ecdsa.PrivateKey) (*wallet.Key, error) {
 	return wallet.NewKey(types.KeyInfo{types.KTSecp256k1, private_data})
 }
 
-func NewInst(ext_key *hdkeychain.ExtendedKey) (hdwallet.IExtendKey, error) {
+func new_from_extkey(ext_key *hdkeychain.ExtendedKey) (hdwallet.IExtendKey, error) {
 	return (&filcoin_hdk{BaseExtKey: &hdwallet.BaseExtKey{ext_key}}).init()
 }
 
-func NewInsFromExtString(extend_key_str string) (hdwallet.IExtendKey, error) {
+func new_from_extkey_str(extend_key_str string) (hdwallet.IExtendKey, error) {
 	var hdk *hdkeychain.ExtendedKey
 	var err error
 	if hdk, err = hdkeychain.NewKeyFromString(extend_key_str); err != nil {
 		return nil, err
 	}
-	return NewInst(hdk)
+	return new_from_extkey(hdk)
 }
 
 // cli command: lotus wallet export 't1gsu7dkdufuygtbcclhmjcao7vg7cap46l6ij2ri',
@@ -133,4 +134,21 @@ func ecdsakey_from_private_key_data(prikey []byte) (*ecdsa.PrivateKey, error) {
 	priv.D = k
 	priv.PublicKey.X, priv.PublicKey.Y = c.ScalarBaseMult(k.Bytes())
 	return priv, nil
+}
+
+func NewHdkey() (*hdwallet.HdKey, error) {
+	master, err := utils.NewExtMaster()
+	utils.Fatal_error(err)
+	filcoin_hdk, err := new_from_extkey(master)
+	utils.Fatal_error(err)
+	return hdwallet.NewFromExtKey(filcoin_hdk, "filcoin", 0)
+}
+
+func NewHdkFromExtkeyString(extKeyStr, slat string, first uint32) (*hdwallet.HdKey, error) {
+	extkey, err := new_from_extkey_str(extKeyStr)
+	if err != nil {
+		return nil, err
+	}
+
+	return hdwallet.NewFromExtKey(extkey, slat, first)
 }

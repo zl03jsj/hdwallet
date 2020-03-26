@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil/hdkeychain"
+	"gitlab.forceup.in/hdwallet"
 	"gitlab.forceup.in/hdwallet/utils"
 	"testing"
 )
@@ -37,17 +38,17 @@ func Test_ecdsaFilCoinAddress(t *testing.T) {
 	}
 }
 
-func Test_filcoinHdk(t *testing.T) {
+func Test_filcoin_extkey(t *testing.T) {
 	master, err := utils.NewExtMaster()
 	utils.Fatal_error(err)
 
-	private_ext, err := NewInst(master)
+	private_ext, err := new_from_extkey(master)
 	utils.Fatal_error(err)
 
 	neuter, err := master.Neuter()
 	utils.Fatal_error(err)
 
-	public__ext, err := NewInst(neuter)
+	public__ext, err := new_from_extkey(neuter)
 	utils.Fatal_error(err)
 
 	for i := uint32(0); i < 100; i++ {
@@ -102,5 +103,32 @@ func TestFilcoinkey_from_string(t *testing.T) {
 		t.Errorf("failed, address not matched!!!\n")
 	} else {
 		t.Logf("success!!!!!!!")
+	}
+}
+
+func Test_filcoin_hdk(t *testing.T) {
+	hdk, err := NewHdkey()
+	utils.Fatal_error(err)
+	hdk_testing(hdk, t)
+}
+
+func hdk_testing(hdk *hdwallet.HdKey, t *testing.T) {
+	var start = uint32(1234567)
+	var end = start + 66
+	for index := start; index < end; index++ {
+		child, err := hdk.Child(index)
+		utils.Fatal_error(err)
+		addr, err := child.ExtKey.Address(nil)
+		utils.Fatal_error(err)
+		fmt.Printf("index:%d, key:%s, childkey:%s, address:%s\n", index, child.ExtKey.String(), child.Chiper, addr.String())
+
+		iextkey, err := hdk.ExtKeyFromKey(child.Chiper)
+		utils.Fatal_error(err)
+
+		if iextkey.String() != child.ExtKey.String() {
+			t.Errorf("address not match, failed")
+		} else {
+			t.Logf("ok!!!!!!!")
+		}
 	}
 }
