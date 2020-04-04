@@ -89,6 +89,20 @@ func filcoin_key_from_public(public *ecdsa.PublicKey) (*wallet.Key, error) {
 	return filcoinkey, nil
 }
 
+func Filcoin_key_from_private_hex(str string) (*wallet.Key, error) {
+	data, err := hex.DecodeString(str)
+	if err != nil {
+		return nil, err
+	}
+
+	private, err := ecdsakey_from_private_key_data(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return Filcoin_key_from_private(private)
+}
+
 func Filcoin_key_from_private(key *ecdsa.PrivateKey) (*wallet.Key, error) {
 	private_data := Filcoin_raw_private(key)
 	return wallet.NewKey(types.KeyInfo{types.KTSecp256k1, private_data})
