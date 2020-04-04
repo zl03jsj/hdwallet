@@ -8,4 +8,3 @@ type IExtendKey interface {
 	IsPrivate() bool
 	Base() *BaseExtKey
 }
-

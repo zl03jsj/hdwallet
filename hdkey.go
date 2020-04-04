@@ -267,4 +267,3 @@ func keyToIndex(index_str, slat string) (uint32, error) {
 		}
 	}
 }
-

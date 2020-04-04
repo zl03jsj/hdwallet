@@ -78,7 +78,7 @@ func TestFilcoinkey_from_string(t *testing.T) {
 	// lotus wallet export
 	addr_str := "t1gsu7dkdufuygtbcclhmjcao7vg7cap46l6ij2ri"
 	hex_str := "7b2254797065223a22736563703235366b31222c22507269766174654b6579223a22674f447046677043326b424b5a565a4d70682b6d4d6b36514a3473793732437a7041656452386a654f61633d227d"
-	walletk, err := filcoinkey_from_string(hex_str)
+	walletk, err := Filcoinkey_from_string(hex_str)
 	utils.Fatal_error(err)
 
 	fmt.Printf("address x = %s\n", walletk.Address.String())

@@ -60,7 +60,7 @@ func DeepCopy2(dst, src interface{}) error {
 }
 
 func Fatal_error(err error) {
-	if err==nil {
+	if err == nil {
 		return
 	}
 	fmt.Printf("fatal_error:%s\n", err.Error())

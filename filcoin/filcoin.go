@@ -111,7 +111,7 @@ func new_from_extkey_str(extend_key_str string) (hdwallet.IExtendKey, error) {
 // get following result:
 // "7b2254797065223a22736563703235366b31222c22507269766174654b6579223a22674f447046677043326b424b5a565a4d70682b6d4d6b36514a3473793732437a7041656452386a654f61633d227d"
 // use following function to get private key, address from result string
-func filcoinkey_from_string(hex_ string) (*wallet.Key, error) {
+func Filcoinkey_from_string(hex_ string) (*wallet.Key, error) {
 	hexdata, err := hex.DecodeString(hex_)
 	if err != nil {
 		return nil, err

@@ -7,4 +7,3 @@ import (
 type extkey_btc_imp struct {
 	extkey *hdkeychain.ExtendedKey
 }
-
