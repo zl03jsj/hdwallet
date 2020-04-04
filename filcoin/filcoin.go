@@ -56,7 +56,7 @@ func (self *filcoin_hdk) init() (*filcoin_hdk, error) {
 	if self.IsPrivate() {
 		var private *ecdsa.PrivateKey
 		if private, err = self.Private(); err == nil {
-			self.filcoinkey, err = filcoin_key_from_private(private)
+			self.filcoinkey, err = Filcoin_key_from_private(private)
 		}
 	} else {
 		var public *ecdsa.PublicKey
@@ -89,7 +89,7 @@ func filcoin_key_from_public(public *ecdsa.PublicKey) (*wallet.Key, error) {
 	return filcoinkey, nil
 }
 
-func filcoin_key_from_private(key *ecdsa.PrivateKey) (*wallet.Key, error) {
+func Filcoin_key_from_private(key *ecdsa.PrivateKey) (*wallet.Key, error) {
 	private_data := filcoin_raw_private(key)
 	return wallet.NewKey(types.KeyInfo{types.KTSecp256k1, private_data})
 }

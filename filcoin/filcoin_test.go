@@ -10,7 +10,6 @@ import (
 )
 
 func Test_ecdsaFilCoinAddress(t *testing.T) {
-	return
 	seed, _ := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 	master, _ := hdkeychain.NewMaster(seed, &chaincfg.MainNetParams)
 
@@ -22,7 +21,7 @@ func Test_ecdsaFilCoinAddress(t *testing.T) {
 
 		ecdspubl := ecdspriv.PublicKey
 
-		filcoin_priv, err := filcoin_key_from_private(ecdspriv)
+		filcoin_priv, err := Filcoin_key_from_private(ecdspriv)
 		utils.Fatal_error(err)
 		filcoin_publ, err := filcoin_key_from_public(&ecdspubl)
 		utils.Fatal_error(err)
@@ -93,7 +92,7 @@ func TestFilcoinkey_from_string(t *testing.T) {
 	priv, err := ecdsakey_from_private_key_data(walletk.PrivateKey)
 	utils.Fatal_error(err)
 
-	walletk, err = filcoin_key_from_private(priv)
+	walletk, err = Filcoin_key_from_private(priv)
 	utils.Fatal_error(err)
 
 	fmt.Printf("address x = %s\n", walletk.Address.String())
