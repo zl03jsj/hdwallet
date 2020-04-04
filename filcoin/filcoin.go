@@ -68,7 +68,7 @@ func (self *filcoin_hdk) init() (*filcoin_hdk, error) {
 	return self, nil
 }
 
-func filcoin_raw_private(key *ecdsa.PrivateKey) []byte {
+func Filcoin_raw_private(key *ecdsa.PrivateKey) []byte {
 	privkey := make([]byte, 32)
 	blob := key.D.Bytes()
 	copy(privkey[32-len(blob):], blob)
@@ -90,7 +90,7 @@ func filcoin_key_from_public(public *ecdsa.PublicKey) (*wallet.Key, error) {
 }
 
 func Filcoin_key_from_private(key *ecdsa.PrivateKey) (*wallet.Key, error) {
-	private_data := filcoin_raw_private(key)
+	private_data := Filcoin_raw_private(key)
 	return wallet.NewKey(types.KeyInfo{types.KTSecp256k1, private_data})
 }
 
