@@ -83,7 +83,7 @@ func filcoin_key_from_public(public *ecdsa.PublicKey) (*wallet.Key, error) {
 	}
 
 	filcoinkey := &wallet.Key{
-		KeyInfo:   types.KeyInfo{types.KTSecp256k1, nil},
+		KeyInfo:   types.KeyInfo{wallet.KTSecp256k1, nil},
 		PublicKey: public_data,
 		Address:   address}
 	return filcoinkey, nil
@@ -105,7 +105,7 @@ func Filcoin_key_from_private_hex(str string) (*wallet.Key, error) {
 
 func Filcoin_key_from_private(key *ecdsa.PrivateKey) (*wallet.Key, error) {
 	private_data := Filcoin_raw_private(key)
-	return wallet.NewKey(types.KeyInfo{types.KTSecp256k1, private_data})
+	return wallet.NewKey(types.KeyInfo{wallet.KTSecp256k1, private_data})
 }
 
 func new_from_extkey(ext_key *hdkeychain.ExtendedKey) (hdwallet.IExtendKey, error) {
