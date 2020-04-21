@@ -171,6 +171,3 @@ func NewHdkFromExtkeyString(extKeyStr, slat string, first uint32) (*hdwallet.HdK
 
 	return hdwallet.NewFromExtKey(extkey, slat, first)
 }
-
-// func SignMessage(message *types.Message) *types.SignedMessage {
-// }
