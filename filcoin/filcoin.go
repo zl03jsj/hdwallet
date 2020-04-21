@@ -5,12 +5,10 @@ import (
 	"crypto/elliptic"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/chain/types"
-	"github.com/filecoin-project/lotus/chain/wallet"
-	_ "github.com/filecoin-project/lotus/lib/sigs/secp"
-	"github.com/ipsn/go-secp256k1"
 	"gitlab.forceup.in/hdwallet"
 	"gitlab.forceup.in/hdwallet/utils"
 	"math/big"
@@ -18,7 +16,7 @@ import (
 
 type filcoin_hdk struct {
 	*hdwallet.BaseExtKey
-	filcoinkey *wallet.Key
+	filcoinkey *Key
 }
 
 func (self *filcoin_hdk) Child(index uint32) (hdwallet.IExtendKey, error) {
@@ -75,27 +73,27 @@ func Filcoin_raw_private(key *ecdsa.PrivateKey) []byte {
 	return privkey
 }
 
-func filcoin_key_from_public(public *ecdsa.PublicKey) (*wallet.Key, error) {
+func filcoin_key_from_public(public *ecdsa.PublicKey) (*Key, error) {
 	public_data := elliptic.Marshal(public.Curve, public.X, public.Y)
 	address, err := address.NewSecp256k1Address(public_data)
 	if err != nil {
 		return nil, err
 	}
 
-	filcoinkey := &wallet.Key{
-		KeyInfo:   types.KeyInfo{wallet.KTSecp256k1, nil},
+	filcoinkey := &Key{
+		KeyInfo:   types.KeyInfo{KTSecp256k1, nil},
 		PublicKey: public_data,
 		Address:   address}
 	return filcoinkey, nil
 }
 
-func Filcoin_key_from_private_hex(str string) (*wallet.Key, error) {
+func Filcoin_key_from_private_hex(str string) (*Key, error) {
 	data, err := hex.DecodeString(str)
 	if err != nil {
 		return nil, err
 	}
 
-	private, err := ecdsakey_from_private_key_data(data)
+	private, err := Ecdsakey_from_private_key_data(data)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +101,9 @@ func Filcoin_key_from_private_hex(str string) (*wallet.Key, error) {
 	return Filcoin_key_from_private(private)
 }
 
-func Filcoin_key_from_private(key *ecdsa.PrivateKey) (*wallet.Key, error) {
+func Filcoin_key_from_private(key *ecdsa.PrivateKey) (*Key, error) {
 	private_data := Filcoin_raw_private(key)
-	return wallet.NewKey(types.KeyInfo{wallet.KTSecp256k1, private_data})
+	return NewKey(types.KeyInfo{KTSecp256k1, private_data})
 }
 
 func new_from_extkey(ext_key *hdkeychain.ExtendedKey) (hdwallet.IExtendKey, error) {
@@ -125,7 +123,7 @@ func new_from_extkey_str(extend_key_str string) (hdwallet.IExtendKey, error) {
 // get following result:
 // "7b2254797065223a22736563703235366b31222c22507269766174654b6579223a22674f447046677043326b424b5a565a4d70682b6d4d6b36514a3473793732437a7041656452386a654f61633d227d"
 // use following function to get private key, address from result string
-func Filcoinkey_from_string(hex_ string) (*wallet.Key, error) {
+func Filcoinkey_from_string(hex_ string) (*Key, error) {
 	hexdata, err := hex.DecodeString(hex_)
 	if err != nil {
 		return nil, err
@@ -137,16 +135,23 @@ func Filcoinkey_from_string(hex_ string) (*wallet.Key, error) {
 		return nil, err
 	}
 
-	return wallet.NewKey(keyinfo)
+	return NewKey(keyinfo)
 }
 
-func ecdsakey_from_private_key_data(prikey []byte) (*ecdsa.PrivateKey, error) {
-	c := secp256k1.S256()
-	k := big.NewInt(0).SetBytes(prikey)
-	priv := new(ecdsa.PrivateKey)
-	priv.PublicKey.Curve = c
-	priv.D = k
-	priv.PublicKey.X, priv.PublicKey.Y = c.ScalarBaseMult(k.Bytes())
+func Ecdsakey_from_private_key_data(prikey []byte) (*ecdsa.PrivateKey, error) {
+	var priv *ecdsa.PrivateKey
+
+	curve := btcec.S256()
+	if true {
+		privkkk, _ := btcec.PrivKeyFromBytes(curve, prikey)
+		return privkkk.ToECDSA(), nil
+	} else {
+		k := big.NewInt(0).SetBytes(prikey)
+		priv = new(ecdsa.PrivateKey)
+		priv.PublicKey.Curve = curve
+		priv.D = k
+		priv.PublicKey.X, priv.PublicKey.Y = curve.ScalarBaseMult(k.Bytes())
+	}
 	return priv, nil
 }
 
@@ -166,3 +171,6 @@ func NewHdkFromExtkeyString(extKeyStr, slat string, first uint32) (*hdwallet.HdK
 
 	return hdwallet.NewFromExtKey(extkey, slat, first)
 }
+
+// func SignMessage(message *types.Message) *types.SignedMessage {
+// }

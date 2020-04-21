@@ -1,6 +1,7 @@
 package filcoin
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil/hdkeychain"
@@ -89,7 +90,7 @@ func TestFilcoinkey_from_string(t *testing.T) {
 		t.Logf("success!!!!!!!")
 	}
 
-	priv, err := ecdsakey_from_private_key_data(walletk.PrivateKey)
+	priv, err := Ecdsakey_from_private_key_data(walletk.PrivateKey)
 	utils.Fatal_error(err)
 
 	walletk, err = Filcoin_key_from_private(priv)
@@ -119,7 +120,12 @@ func hdk_testing(hdk *hdwallet.HdKey, t *testing.T) {
 		utils.Fatal_error(err)
 		addr, err := child.ExtKey.Address(nil)
 		utils.Fatal_error(err)
-		fmt.Printf("index:%d, key:%s, childkey:%s, address:%s\n", index, child.ExtKey.String(), child.Chiper, addr.String())
+
+		fc_child, _ := child.ExtKey.(*filcoin_hdk)
+		fmt.Printf("index:%d\nkey:%s\nchildkey:%s\naddress:%s\nprivate_hex:%s\npublick_hex:%s\n",
+			index, child.ExtKey.String(), child.Chiper, addr.String(),
+			hex.EncodeToString(fc_child.filcoinkey.PrivateKey),
+			hex.EncodeToString(fc_child.filcoinkey.PublicKey))
 
 		iextkey, err := hdk.ExtKeyFromKey(child.Chiper)
 		utils.Fatal_error(err)
