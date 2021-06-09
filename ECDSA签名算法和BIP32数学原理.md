@@ -92,13 +92,16 @@ func signGeneric(pk *PrivateKey, csprng *cipher.StreamReader, c elliptic.Curve, 
 
 代码中的两层for循环,是因为临时生成的私钥不满足条件(**具体原因后面在说**),for循环会重新再次随机生成临时私钥对于,99.99%的情况是,这个for循环只会执行一次.
 所以根据代码可以把计算 *r* 和 *s* 的代数表达式简单的写成:
-$$
+
+$\begin{aligned}
 r = R.x
-$$
+\end{aligned}$
+
 **即 r 的几何意义为:临时私钥k的公钥R[ = k * G 为椭圆曲线上的一个点]的x坐标.**
-$$
+
+$\begin{aligned}
 s = (e + r * pk) / k
-$$
+\end{aligned}$
 
 ### 验证签名:verifyGeneric
 
@@ -137,16 +140,14 @@ func verifyGeneric(pub *PublicKey, c elliptic.Curve, hash []byte, r, s *big.Int)
 - 函数***ScalarMult*** 是椭圆曲线有限域上定义的n * P的乘法, 第1,2个参数表示P的x和y坐标, 第3个参数为n.
 
 根据函数的实现可以写出验证代数表达式, 并执行推导出如下结果:
-$$
-\begin{aligned}
-&= e*G/s + r*Pub/s \\
-&= e*G/s + r*Pk*G/s \\
+
+$\begin{aligned} 
+e*G/s + r*Pub/s &= e*G/s + r*Pk*G/s \\
 &= (e+r*Pk)*G/s \\
 &= ((e + r * Pk) * G)\ /\  ((e + r * Pk) / k) \\
 &= k * G \\
 &= R
-\end{aligned}
-$$
+\end{aligned}$
 
 - e为签名数据hash值的整数形式
 
@@ -221,21 +222,17 @@ $$
 5. 然后计算  k_pub<sub>ephemeral</sub> + k_pub<sub>par</sub> 作为子公钥 = k_pub<sub>child</sub>
 
 又由于椭圆曲线上的点是一个阿贝尔群, 满足加法交换律和结合律, 可以有下面的推导过程:
-$$
-\begin{aligned}
-k\_pub_{ephemeral} + k\_pub_{par} \\
-&= k_{ephemeral} * G + k_{par} * G \\
+$\begin{aligned}
+k\_pub_{ephemeral} + k\_pub_{par} &= k_{ephemeral} * G + k_{par} * G \\
 &= (k_{ephemeral} + k_{par}) * G \\
 &= k_{child} * G \\
 &= k\_pub_{child} \\ 
-\end{aligned}
-$$
+\end{aligned}$
 
 **这就是为什么HD Wallet只需要暴露扩展公钥就能推测出子私钥地址的原因**.
 
 ### 分层确定钱包的风险
-
-
+分层确定钱包的风险请参考这篇文章:[Private Key Recovery Combination Attacks](https://github.com/zl03jsj/hdwallet/blob/master/Private%20Key%20Recovery%20Combination%20Attacks.pdf)
 
 ## 参考引用
 
@@ -246,4 +243,3 @@ $$
 [椭圆曲线加密算法](https://zhuanlan.zhihu.com/p/101907402)
 [ECC椭圆曲线详解](https://www.cnblogs.com/Kalafinaian/p/7392505.html)
 [bitcoin extendedkey 源码](https://github.com/btcsuite/btcutil/blob/faeebcb9abbed8d21aa424d0447af576a72e1b8e/hdkeychain/extendedkey.go#L229)
-
