@@ -1,4 +1,4 @@
-### Filcoin出块权算法原理
+### Filecoin出块权算法原理
 
 万丈高楼从地起, 所以需要先从最基本的说起.
 
@@ -97,11 +97,11 @@ f(k, n, p) &= C_n^kp^k(1-p)^{n-k} \\
 
 **所以, 当二项式分布测试样本n非常大的时候, 就可以逼近泊松分布了.**
 
-### Filcoin中出块权的计算
+### Filecoin中出块权的计算
 
-有了上面的基础, 就可以更加深入, 开始研究Filcoin出块权的计算的原理了.
+有了上面的基础, 就可以更加深入, 开始研究Filecoin出块权的计算的原理了.
 
-Filcoin计算出块wincount的代码如下, 后面会分几个部分进行详细的讨论:
+Filecoin计算出块wincount的代码如下, 后面会分几个部分进行详细的讨论:
 
 ```go
 // ComputeWinCount uses VRFProof to compute number of wins
@@ -133,7 +133,7 @@ func (ep *ElectionProof) ComputeWinCount(power BigInt, totalPower BigInt) int64 
 
 #### 关于计算$\lambda$的解释
 
-矿工出块的概率理论受自身算力的影响和全网算力的影响,在Filcoin出块权限计算的时候, 这个$\lambda$的计算方法为:
+矿工出块的概率理论受自身算力的影响和全网算力的影响,在Filecoin出块权限计算的时候, 这个$\lambda$的计算方法为:
 
 ```go
 // computes lambda in Q.256
@@ -155,7 +155,7 @@ $\lambda = \frac{blocks\_per\_epoch\ *\  power}{total\_power} * 2^{256}, \{block
 
 #### 关于$1-CDF[Poisson[\lambda], k]$的意义
 
-对于Filcoin计算Wincount部分的泊松分布, 根据前面的了解,可以知道,
+对于Filecoin计算Wincount部分的泊松分布, 根据前面的了解,可以知道,
 
 累积分布**$CDF[Poisson[\lambda], k]$**的意义表示:
 
@@ -165,7 +165,7 @@ $\lambda = \frac{blocks\_per\_epoch\ *\  power}{total\_power} * 2^{256}, \{block
 
 <font color=green>当$n \to \infty$时, 矿工出块数为$k \to n (n \to \infty)$的概率.</font>
 
-所以在Filcoin计算wincount的下面这一部分代码中:
+所以在Filecoin计算wincount的下面这一部分代码中:
 
 ```go
 p, rhs := newPoiss(lam)
@@ -188,9 +188,9 @@ for lhs.Cmp(rhs) < 0 && j < MaxWinCount {
 
 #### 关于lhs(hash256[VRFProof])的理解
 
-VRFProof是Filcoin的分布式随机数生成服务生成的256bit的随机变量,
+VRFProof是Filecoin的分布式随机数生成服务生成的256bit的随机变量,
 
-由于Filcoin已经把poisson分布中的概率, 映射到了$[0, 2^{256})$之间,概率上可以视为$[0,1)$之间的一个值.
+由于Filecoin已经把poisson分布中的概率, 映射到了$[0, 2^{256})$之间,概率上可以视为$[0,1)$之间的一个值.
 
 ```go
 h := blake2b.Sum256(ep.VRFProof)
